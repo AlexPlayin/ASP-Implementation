@@ -29,22 +29,35 @@ def calc_recursive(i,j):
     
     return max(calcs)
 
-memo = {}
 
-def calc_memo(i,j):
-    if (i,j) in memo:
-        return memo[(i,j)]
-    S = calc_s(i,j)
-    if S == []:
-        return 0
-    
-    calcs = []
-    for index,k in enumerate(S):
-        calcs.append(calc_memo(i,k) + calc_memo(k,j) + 1)
-    
-    return_val = max(calcs)
-    memo[(i,j)] = return_val
-    return return_val
+
+def calc_memo():
+    # Generate Table
+    table = {}
+    queue = []
+
+    for i in range(0, len(start_times)):
+        for j in range(i, len(start_times)):
+            queue.append((i,j))
+    queue.sort(key=lambda tup: tup[1] - tup[0])
+
+    for i in range(0, len(queue)):
+        entry = queue[i]
+        S = calc_s(entry[0], entry[1])
+
+        if S == []:
+            table[entry] = 0
+
+        calcs = [0]
+
+        for index,k in enumerate(S):
+            calcs.append(table[(entry[0],k)] + table[(k,entry[1])] + 1)  
+        
+        table[entry] = max(calcs)
+        #queue.remove(entry)
+        #print(queue)
+
+    return table[(0,len(start_times)-1)]
 
 def calc_greedy():
     n = len(start_times_greedy)
@@ -59,26 +72,27 @@ def calc_greedy():
 # execution
 import time
 
+amount = 1000000 
+
 times = {
     "rec": 0,
-    "memo": 0,
+    "dyn": 0,
     "greedy":0
 }
-
-for i in range(0,1000000):
-    print(f"\r {i}/1000000", end="")
+for i in range(0,amount):
+    print(f"\r {i}/{amount}", end="")
     memo = {}
     timer1 = time.time()
     calc_recursive(0, len(start_times) - 1)
     times["rec"] += time.time() - timer1
     
     timer1 = time.time()
-    calc_memo(0, len(start_times) - 1)
-    times["memo"] += time.time() - timer1
+    calc_memo()
+    times["dyn"] += time.time() - timer1
 
     timer1 = time.time()
     calc_greedy()
     times["greedy"] += time.time() - timer1
 
 for i in times:
-    print(i, times[i] * 10000000 / 1000000, "us")
+    print(i, times[i] * 10000000 / amount, "us")
