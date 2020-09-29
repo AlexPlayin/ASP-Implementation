@@ -3,6 +3,7 @@ end_times =   [0,4,5,6,7,9,9,10,11,12,14,16,18]
 #               [0,1,2,3,4,5, 6, 7, 8, 9,10]
 start_times_greedy = start_times[:-1]
 end_times_greedy = end_times[:-1]
+
 # Calculates S[i,j]
 def calc_s(i,j):
     if i > j:
@@ -41,6 +42,8 @@ def calc_memo():
             queue.append((i,j))
     queue.sort(key=lambda tup: tup[1] - tup[0])
 
+    print("QueueSize", len(queue))
+
     for i in range(0, len(queue)):
         entry = queue[i]
         S = calc_s(entry[0], entry[1])
@@ -69,10 +72,49 @@ def calc_greedy():
             k = m
     return len(A)
 
+
+def generate_activities(n):
+    import random
+    import math
+
+    global start_times, end_times, start_times_greedy, end_times_greedy
+
+
+    start_times = [-1]
+    end_times = [0]
+
+    values = []
+
+    for i in range(0, n):
+
+        s = math.floor(random.uniform(0, 24))
+        e = math.floor(random.uniform(1, 12)) + s
+
+        if e > 24:
+            e = 24
+
+        values.append((s,e))
+
+    values.sort(key=lambda tup: tup[1])
+    
+    for i in values:
+        start_times.append(i[0])
+        end_times.append(i[1])
+
+    start_times.append(24)
+    end_times.append(25)
+
+    start_times_greedy = start_times[:-1]
+    end_times_greedy = end_times[:-1]
+
+
 # execution
 import time
 
-amount = 1000000 
+generate_activities(60)
+
+amount = 1
+
 
 times = {
     "rec": 0,
@@ -87,6 +129,7 @@ for i in range(0,amount):
     times["rec"] += time.time() - timer1
     
     timer1 = time.time()
+
     calc_memo()
     times["dyn"] += time.time() - timer1
 
@@ -95,4 +138,4 @@ for i in range(0,amount):
     times["greedy"] += time.time() - timer1
 
 for i in times:
-    print(i, times[i] * 10000000 / amount, "us")
+    print(i, times[i] / amount, "s")
